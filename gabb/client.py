@@ -1,44 +1,19 @@
-# pylint: disable=unused-argument
+"""API client for Gabb.
+
+This contains the GabbClient class, which serves as the main REST API client 
+    for the services used by the Gabb (https://gabb.com) smartwatch/smartphone 
+    for children. While the devices are made by Gabb, they utilize the FiLIP 
+    service provided by Smartcom (https://smartcom.com) to manage the data and 
+    devices and that is what the class connects to.
+
+Example:
+    client = GabbClient("username", "password")
+    client.get_contacts()
+"""
 import datetime
-import requests
 from urllib.parse import urljoin
-from gabb.auth import GabbAuth
-
-
-class GabbSession(requests.Session):
-    """Custom Session class to add base URL functionality and handle the custom
-    auth object"""
-
-    def __init__(
-        self,
-        username: str,
-        password: str,
-        base_url: str = None,
-        alt_base_url: str = None,
-    ) -> None:
-        """Catch and set base_url on instance, then pass up to requests.Session"""
-        super().__init__()
-        self.base_url = base_url
-        """Base URL for the session"""
-        self.alt_base_url = alt_base_url
-        """Alternative base URL for the session"""
-        self.use_alt_base_url_next_request = False
-        """Flag to use alternative base URL for the session"""
-        self.auth = GabbAuth(username=username, password=password)
-
-    def request(self, method: str, url: str, *args, **kwargs) -> requests.Request:
-        """Catch and inject in the base_url (or alt_base_url), then pass up to
-        requests.request()"""
-
-        # If the use_alt_base_url_next_request flag is true, use alt base URL,
-        # then set flag to False. Otherwise, use base URL
-        if self.use_alt_base_url_next_request:
-            joined_url = urljoin(self.alt_base_url, url)
-            self.use_alt_base_url_next_request = False
-        else:
-            joined_url = urljoin(self.base_url, url)
-
-        return super().request(method, joined_url, *args, **kwargs)
+import requests
+from gabb.session import GabbSession
 
 
 class GabbClient:
@@ -234,9 +209,9 @@ class GabbClient:
         self,
         device_id: int,
         gender: int = None,
-        firstName: str = None,
-        lastName: str = None,
-        birthDate: datetime.datetime = None,
+        first_name: str = None,
+        last_name: str = None,
+        birth_date: datetime.datetime = None,
     ) -> requests.Response:
         """Update device profile, which is the mainly info about the child using
         the device
@@ -271,7 +246,7 @@ class GabbClient:
                 * 1000
             )
 
-        self._session.put(f"device/update-profile/{device_id}", json=payload)
+        return self._session.put(f"device/update-profile/{device_id}", json=payload)
 
     def get_map(self) -> requests.Response:
         """Get device geolocation data, as well as a general device info
@@ -931,7 +906,7 @@ class GabbClient:
 
     @staticmethod
     def prepare_params_for_api_call(
-        locals_: dict, values_to_filter: list = [], title_case: bool = False
+        locals_: dict, values_to_filter: list = None, title_case: bool = False
     ) -> dict:
         """Take the return value of locals() from an API method in this class
         and prepare them
@@ -970,6 +945,8 @@ class GabbClient:
                     json=payload
                 )
         """
+        if values_to_filter is None:
+            values_to_filter = []
         values_to_filter.append("self")
         filtered_locals = {}
 
