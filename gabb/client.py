@@ -1,9 +1,7 @@
-import requests
-import json
 from dateutil import parser
 import datetime
-
-# from datetime import datetime, timezone, time
+import json
+import requests
 from urllib.parse import urljoin
 
 
