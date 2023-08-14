@@ -1,3 +1,12 @@
+# Ignoring several pylint methods for now:
+#   too-many-instance-attributes: We go over pylint's recommendation by one, but
+#       leaving it as it makes sense....any other data construction I can come up
+#       with would seem contrived.
+#   too-many-arguments: We go over pylint's recommendation by one, but
+#       leaving it as it makes sense....any other data construction I can come up
+#       with would seem contrived or not expose things that could be useful to
+#       configure in the future.
+# pylint: disable=too-many-instance-attributes, too-many-arguments
 """Custom requests authentication for Gabb.
 
 This contains the GabbAuth class, which is a custom authentication callable for

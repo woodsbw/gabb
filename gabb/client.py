@@ -1,3 +1,10 @@
+# Ignoring several pylint methods for now:
+#   unused-argument: There is processing of arguments going on via locals()
+#       that pylint isn't catching
+#   too-many-arguments, too-many-public-methods: Given the functionality of
+#       this package, the choice was made to just represent the APIs as they
+#       exist, which means a large number of methods and attributes.
+# pylint: disable=unused-argument, too-many-arguments, too-many-public-methods
 """API client for Gabb.
 
 This contains the GabbClient class, which serves as the main REST API client 
