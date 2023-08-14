@@ -33,7 +33,8 @@ class GabbAuth(requests.auth.AuthBase):
     _refresh_token = ""
     """str: The API endpoint used for token refresh. Do not manipulate directly."""
     _exp_date = ""
-    """datetime.datetime: Datetime object representing when the current active token heald in _access_token will expire."""
+    """datetime.datetime: Datetime object representing when the current active
+    token held in _access_token will expire."""
     _required_headers = {
         "X-Accept-Language": "en-US",
         "X-Accept-Offset": "-5.000000",
@@ -71,11 +72,14 @@ class GabbAuth(requests.auth.AuthBase):
         self.password = password
         """str: Parent/guardian account password."""
         self.auth_url = auth_url
-        """ str: The API endpoint used to generate a fresh access token from the parent/guardian account username and password."""
+        """ str: The API endpoint used to generate a fresh access token from the 
+        parent/guardian account username and password."""
         self.refresh_url = refresh_url
-        """str: The API endpoint used to generate an access token with the refresh token from the prior auth request."""
+        """str: The API endpoint used to generate an access token with the refresh 
+        token from the prior auth request."""
         self.app_build = app_build
-        """str: Build version of the Gabb app we are emulating. Best left alone unless you have a specific use case."""
+        """str: Build version of the Gabb app we are emulating. Best left alone unless 
+        you have a specific use case."""
 
         self._newAuthentication()
 
@@ -98,7 +102,7 @@ class GabbAuth(requests.auth.AuthBase):
             self._refreshAuthentication()
 
         request.headers.update(
-            {"Authorization": "Bearer {}".format(self._access_token)}
+            {"Authorization": f"Bearer {self._access_token}"}
         )
 
         return request
@@ -139,12 +143,14 @@ class GabbAuth(requests.auth.AuthBase):
 
     @property
     def _token_expired(self) -> bool:
-        """bool: Returns True if the current active access token has expired and False if it hasn't"""
+        """bool: Returns True if the current active access token has expired and False
+        if it hasn't"""
         return self._exp_date < datetime.datetime.now(datetime.timezone.utc)
 
 
 class GabbSession(requests.Session):
-    """Custom Session class to add base URL functionality and handle the custom auth object"""
+    """Custom Session class to add base URL functionality and handle the custom
+    auth object"""
 
     def __init__(
         self,
@@ -164,7 +170,8 @@ class GabbSession(requests.Session):
         self.auth = GabbAuth(username=username, password=password)
 
     def request(self, method: str, url: str, *args, **kwargs) -> requests.Request:
-        """Catch and inject in the base_url (or alt_base_url), then pass up to requests.request()"""
+        """Catch and inject in the base_url (or alt_base_url), then pass up to
+        requests.request()"""
 
         # If the use_alt_base_url_next_request flag is true, use alt base URL,
         # then set flag to False. Otherwise, use base URL
@@ -195,7 +202,8 @@ class GabbClient:
         "X-Accept-Version": "1.0",
         "Content-Type": "application/json",
     }
-    """dict: A dict of static headers that the API requires in order to function properly"""
+    """dict: A dict of static headers that the API requires in order to function 
+    properly"""
 
     def __init__(
         self, username: str, password: str, base_url: str = "https://api.myfilip.com/"
@@ -302,8 +310,8 @@ class GabbClient:
         """Delete contact
 
         Args:
-            contact_id (str): ID number of the contact to delete. Can retrieve from
-                the get_contact method.
+            contact_id (str): ID number of the contact to delete. Can retrieve
+                from the get_contact method.
 
         Returns:
             requests.Response: The raw response object (per the requests
@@ -312,7 +320,7 @@ class GabbClient:
         Example:
             resp = client.delete_contact(5555555)
         """
-        return self._session.delete("contact/{}".format(contact_id))
+        return self._session.delete(f"contact/{contact_id}")
 
     def get_emergency_contact(self) -> requests.Response:
         """Get the identity of the emergency contacts for all devices on the account
@@ -340,11 +348,14 @@ class GabbClient:
                 library) for the API response.
 
         Example:
-            resp = client.set_emergency_contact(device_id=555555, contact_id=5555555)
+            resp = client.set_emergency_contact(
+                device_id=555555,
+                contact_id=5555555
+            )
         """
         payload = {"contactId": contact_id, "isTemplate": False}
 
-        return self._session.put("contact/emergency/{}".format(device_id), json=payload)
+        return self._session.put(f"contact/emergency/{device_id}", json=payload)
 
     def get_device_profile(self, device_id: int) -> requests.Response:
         """Get the device profile
@@ -360,7 +371,7 @@ class GabbClient:
         Example:
             resp = client.get_device_profile(555555)
         """
-        return self._session.get("device/profile/{}".format(device_id))
+        return self._session.get(f"device/profile/{device_id}")
 
     def update_device_profile(
         self,
@@ -370,7 +381,8 @@ class GabbClient:
         lastName: str = None,
         birthDate: datetime.datetime = None,
     ) -> requests.Response:
-        """Update device profile, which is the mainly info about the child using the device
+        """Update device profile, which is the mainly info about the child using
+        the device
 
         Args:
             device_id (int): Device ID of the device to set the emergency contact
@@ -386,7 +398,11 @@ class GabbClient:
 
         Example:
             birthday = datetime.datetime(2015, 5, 5, 5, 0, 0)
-            resp = client.update_device_profile(device_id=555555, birthDate=birthday, gender=2)
+            resp = client.update_device_profile(
+                device_id=555555,
+                birthDate=birthday,
+                gender=2
+            )
         """
         payload = GabbClient.prepare_params_for_api_call(
             locals_=locals(), values_to_filter=["device_id"]
@@ -398,7 +414,7 @@ class GabbClient:
                 * 1000
             )
 
-        self._session.put("device/update-profile/{}".format(device_id), json=payload)
+        self._session.put(f"device/update-profile/{device_id}", json=payload)
 
     def get_map(self) -> requests.Response:
         """Get device geolocation data, as well as a general device info
@@ -422,7 +438,7 @@ class GabbClient:
             requests.Response: The raw response object (per the requests
                 library) for the API response.
         """
-        return self._session.post("map/refresh/{}".format(device_id))
+        return self._session.post(f"map/refresh/{device_id}")
 
     def get_event_log(self) -> requests.Response:
         """Get the entries in the event log
@@ -476,7 +492,7 @@ class GabbClient:
                 device_id=555555, silent_mode=False, active_tracking_enable=False
             )
         """
-        return self._session.get("settings/{}".format(device_id))
+        return self._session.get(f"settings/{device_id}")
 
     def update_device_settings(
         self,
@@ -538,7 +554,7 @@ class GabbClient:
 
         # print(filtered_locals)
 
-        return self._session.put("settings/{}".format(device_id), json=filtered_locals)
+        return self._session.put(f"settings/{device_id}", json=filtered_locals)
 
     def get_user_profile(self) -> requests.Response:
         """Get the user (parent) profile
@@ -550,7 +566,8 @@ class GabbClient:
         return self._session.get("user/profile")
 
     def get_goals(self, device_id: int) -> requests.Response:
-        """Get the goals set for a specific device. Step goal is the only one used by Gabb
+        """Get the goals set for a specific device. Step goal is the only one
+        used by Gabb
 
         Args:
             device_id (int): Device ID of the device to set the emergency contact
@@ -563,7 +580,7 @@ class GabbClient:
         Example:
             resp = client.get_goals(555555)
         """
-        return self._session.get("device/goals/{}".format(device_id))
+        return self._session.get(f"device/goals/{device_id}")
 
     def set_step_goal(self, device_id: int, step_goal: int) -> requests.Response:
         """Set the step goal for a specific device.
@@ -588,7 +605,7 @@ class GabbClient:
         )
 
         return self._session.post(
-            "device/goals/{}".format(device_id), json=filtered_locals
+            f"device/goals/{device_id}", json=filtered_locals
         )
 
     def get_lock_mode_schedules(self) -> requests.Response:
@@ -694,7 +711,7 @@ class GabbClient:
         Example:
             resp = client.delete_lock_mode_schedule(555555)
         """
-        return self._session.delete("alarms/{}".format(lock_mode_schedule_id))
+        return self._session.delete(f"alarms/{lock_mode_schedule_id}")
 
     def update_lock_mode_schedule(
         self,
@@ -766,7 +783,7 @@ class GabbClient:
         )
 
         return self._session.put(
-            "alarms/{}".format(lock_mode_schedule_id), json=payload
+            f"alarms/{lock_mode_schedule_id}", json=payload
         )
 
     def get_todos(self) -> requests.Response:
@@ -801,7 +818,8 @@ class GabbClient:
         return self._session.delete("todo", json=payload)
 
     def add_todo(self) -> requests.Response:
-        """Adding todos not yet implemented, as the data structure isn't yet fully understood
+        """Adding todos not yet implemented, as the data structure isn't yet fully
+        understood
 
         Raises:
             NotImplementedError: Raised on any call to this method until implemented
@@ -809,7 +827,8 @@ class GabbClient:
         raise NotImplementedError("Adding Todos not yet supported.")
 
     def update_todo(self) -> requests.Response:
-        """Updating todos not yet implemented, as the data structure isn't yet fully understood
+        """Updating todos not yet implemented, as the data structure isn't yet fully
+        understood
 
         Raises:
             NotImplementedError: Raised on any call to this method until implemented
@@ -830,7 +849,7 @@ class GabbClient:
         Example:
             resp = client.get_text_presets()
         """
-        return self._session.get("tokk/device/{}/preset".format(device_id))
+        return self._session.get(f"tokk/device/{device_id}/preset")
 
     def delete_text_preset(self, device_id: int, preset_id: int) -> requests.Response:
         """Delete text preset option
@@ -849,9 +868,7 @@ class GabbClient:
 
         """
         return self._session.delete(
-            "tokk/device/{device_id}/preset/{preset_id}".format(
-                device_id=device_id, preset_id=preset_id
-            )
+            f"tokk/device/{device_id}/preset/{preset_id}"
         )
 
     def add_text_preset(self, device_id: int, message: str) -> requests.Response:
@@ -875,7 +892,7 @@ class GabbClient:
         payload = GabbClient.prepare_params_for_api_call(locals_=locals())
 
         return self._session.post(
-            "tokk/device/{}/preset".format(device_id), json=payload
+            f"tokk/device/{device_id}/preset", json=payload
         )
 
     def update_text_preset(
@@ -903,9 +920,7 @@ class GabbClient:
         payload = GabbClient.prepare_params_for_api_call(locals_=locals())
 
         return self._session.put(
-            "tokk/device/{device_id}/preset/{preset_id}".format(
-                device_id=device_id, preset_id=preset_id
-            ),
+            f"tokk/device/{device_id}/preset/{preset_id}",
             json=payload,
         )
 
@@ -990,7 +1005,7 @@ class GabbClient:
             resp = client.delete_safezone(555555)
         """
         self._session.use_alt_base_url_next_request = True
-        return self._session.post("safezone/delete?zoneId={}".format(zone_id))
+        return self._session.post(f"safezone/delete?zoneId={zone_id}")
 
     def update_safezone(
         self,
@@ -1043,12 +1058,13 @@ class GabbClient:
         self._session.use_alt_base_url_next_request = True
 
         return self._session.post(
-            "safezone/edit?zoneId={}".format(zone_id), json=payload
+            f"safezone/edit?zoneId={zone_id}", json=payload
         )
 
     @staticmethod
     def convert_time_to_seconds(time: datetime.time) -> int:
-        """A static method to take a datetime.time and convert it into seconds into a day
+        """A static method to take a datetime.time and convert it into seconds
+        into a day
 
         Args:
             time (datetime.time): A time object for the time of day
@@ -1070,7 +1086,8 @@ class GabbClient:
     def prepare_params_for_api_call(
         locals_: dict, values_to_filter: list = [], title_case: bool = False
     ) -> dict:
-        """Take the return value of locals() from an API method in this class and prepare them
+        """Take the return value of locals() from an API method in this class
+        and prepare them
 
         This method will strip out values that don't need to be passed to the
         API (self, plus any caller defined exclusions, or params with a value
@@ -1101,7 +1118,10 @@ class GabbClient:
                     values_to_filter=['device_id']
                 )
 
-                resp = requests.post("https://api.server.net/v2/object/{device_id}".format(device_id), json=payload)
+                resp = requests.post(
+                    "https://api.server.net/v2/object/{device_id}".format(device_id),
+                    json=payload
+                )
         """
         values_to_filter.append("self")
         filtered_locals = {}
