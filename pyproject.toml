@@ -3,7 +3,7 @@ name = "gabb"
 version = "0.1.0"
 description = "A Python wrapper around the services powering the Gabb smartwatch/smartphone."
 authors = ["Ben Woods <ben@benandkristin.info>"]
-license = "Apache License, Version 2.0"
+license = "Apache-2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
